@@ -1,10 +1,18 @@
-const _ = require('lodash');
-const chalk = require('chalk');
-const uuid = require('uuid');
-const mochaUtils = require('mocha/lib/utils');
-const stringify = require('json-stringify-safe');
-const diff = require('diff');
-const stripAnsi = require('strip-ansi');
+'use strict';
+
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _ = require('lodash');
+var chalk = require('chalk');
+var uuid = require('uuid');
+var mochaUtils = require('mocha/lib/utils');
+var stringify = require('json-stringify-safe');
+var diff = require('diff');
+var stripAnsi = require('strip-ansi');
 
 /**
  * Return a classname based on percentage
@@ -16,12 +24,12 @@ const stripAnsi = require('strip-ansi');
 function log(msg, level, config) {
   // Don't log messages in quiet mode
   if (config && config.quiet) return;
-  const logMethod = console[level] || console.log;
-  let out = msg;
-  if (typeof msg === 'object') {
+  var logMethod = console[level] || console.log;
+  var out = msg;
+  if ((typeof msg === 'undefined' ? 'undefined' : (0, _typeof3.default)(msg)) === 'object') {
     out = stringify(msg, null, 2);
   }
-  logMethod(`[${chalk.gray('mochawesome')}] ${out}\n`);
+  logMethod('[' + chalk.gray('mochawesome') + '] ' + out + '\n');
 }
 
 /**
@@ -49,7 +57,7 @@ function getPercentClass(pct) {
  * @param {Array} propsToKeep - properties to keep
  */
 function removeAllPropsFromObjExcept(obj, propsToKeep) {
-  _.forOwn(obj, (val, prop) => {
+  _.forOwn(obj, function (val, prop) {
     if (propsToKeep.indexOf(prop) === -1) {
       delete obj[prop];
     }
@@ -65,15 +73,12 @@ function removeAllPropsFromObjExcept(obj, propsToKeep) {
  * @return {String} cleaned code string
  */
 function cleanCode(str) {
-  str = str
-    .replace(/\r\n?|[\n\u2028\u2029]/g, '\n').replace(/^\uFEFF/, '')
-    .replace(/^function\s*\(.*\)\s*{|\(.*\)\s*=>\s*{?/, '')
-    .replace(/\s*\}$/, '');
+  str = str.replace(/\r\n?|[\n\u2028\u2029]/g, '\n').replace(/^\uFEFF/, '').replace(/^function\s*\(.*\)\s*{|\(.*\)\s*=>\s*{?/, '').replace(/\s*\}$/, '');
 
-  const spaces = str.match(/^\n?( *)/)[1].length;
-  const tabs = str.match(/^\n?(\t*)/)[1].length;
+  var spaces = str.match(/^\n?( *)/)[1].length;
+  var tabs = str.match(/^\n?(\t*)/)[1].length;
   /* istanbul ignore next */
-  const re = new RegExp(`^\n?${tabs ? '\t' : ' '}{${tabs || spaces}}`, 'gm');
+  var re = new RegExp('^\n?' + (tabs ? '\t' : ' ') + '{' + (tabs || spaces) + '}', 'gm');
 
   str = str.replace(re, '');
   str = str.replace(/^\s+|\s+$/g, '');
@@ -89,21 +94,21 @@ function cleanCode(str) {
  *
  * @return {string} diff
  */
-function createUnifiedDiff({ actual, expected }) {
-  return diff.createPatch('string', actual, expected)
-    .split('\n')
-    .splice(4)
-    .map(line => {
-      if (line.match(/@@/)) {
-        return null;
-      }
-      if (line.match(/\\ No newline/)) {
-        return null;
-      }
-      return line.replace(/^(-|\+)/, '$1 ');
-    })
-    .filter(line => typeof line !== 'undefined' && line !== null)
-    .join('\n');
+function createUnifiedDiff(_ref) {
+  var actual = _ref.actual,
+      expected = _ref.expected;
+
+  return diff.createPatch('string', actual, expected).split('\n').splice(4).map(function (line) {
+    if (line.match(/@@/)) {
+      return null;
+    }
+    if (line.match(/\\ No newline/)) {
+      return null;
+    }
+    return line.replace(/^(-|\+)/, '$1 ');
+  }).filter(function (line) {
+    return typeof line !== 'undefined' && line !== null;
+  }).join('\n');
 }
 
 /**
@@ -115,7 +120,10 @@ function createUnifiedDiff({ actual, expected }) {
  *
  * @return {array} diff string objects
  */
-function createInlineDiff({ actual, expected }) {
+function createInlineDiff(_ref2) {
+  var actual = _ref2.actual,
+      expected = _ref2.expected;
+
   return diff.diffWordsWithSpace(actual, expected);
 }
 
@@ -127,15 +135,21 @@ function createInlineDiff({ actual, expected }) {
  * @return {Object} normalized error
  */
 function normalizeErr(err, config) {
-  const { name, message, actual, expected, stack, showDiff } = err;
-  let errMessage;
-  let errDiff;
+  var name = err.name,
+      message = err.message,
+      actual = err.actual,
+      expected = err.expected,
+      stack = err.stack,
+      showDiff = err.showDiff;
+
+  var errMessage = void 0;
+  var errDiff = void 0;
 
   /**
    * Check that a / b have the same type.
    */
   function sameType(a, b) {
-    const objToString = Object.prototype.toString;
+    var objToString = Object.prototype.toString;
     return objToString.call(a) === objToString.call(b);
   }
 
@@ -152,7 +166,7 @@ function normalizeErr(err, config) {
   // Assertion libraries do not output consitent error objects so in order to
   // get a consistent message object we need to create it ourselves
   if (name && message) {
-    errMessage = `${name}: ${stripAnsi(message)}`;
+    errMessage = name + ': ' + stripAnsi(message);
   } else if (stack) {
     errMessage = stack.replace(/\n.*/g, '');
   }
@@ -174,9 +188,9 @@ function normalizeErr(err, config) {
  */
 function cleanTest(test, config) {
   /* istanbul ignore next: test.fn exists prior to mocha 2.4.0 */
-  const code = config.enableCode ? (test.fn ? test.fn.toString() : test.body) : null;
+  var code = config.enableCode ? test.fn ? test.fn.toString() : test.body : null;
 
-  const cleaned = {
+  var cleaned = {
     title: test.title,
     fullTitle: _.isFunction(test.fullTitle) ? test.fullTitle() : /* istanbul ignore next */test.title,
     timedOut: test.timedOut,
@@ -188,14 +202,14 @@ function cleanTest(test, config) {
     pending: test.pending,
     context: stringify(test.context, null, 2),
     code: code && cleanCode(code),
-    err: (test.err && normalizeErr(test.err, config)) || {},
+    err: test.err && normalizeErr(test.err, config) || {},
     isRoot: test.parent && test.parent.root,
     uuid: test.uuid || /* istanbul ignore next: default */uuid.v4(),
     parentUUID: test.parent && test.parent.uuid,
     isHook: test.type === 'hook'
   };
 
-  cleaned.skipped = (!cleaned.pass && !cleaned.fail && !cleaned.pending && !cleaned.isHook);
+  cleaned.skipped = !cleaned.pass && !cleaned.fail && !cleaned.pending && !cleaned.isHook;
 
   return cleaned;
 }
@@ -210,16 +224,22 @@ function cleanTest(test, config) {
  */
 function cleanSuite(suite, totalTestsRegistered, config) {
   suite.uuid = uuid.v4();
-  const beforeHooks = _.map([].concat(suite._beforeAll, suite._beforeEach), test => cleanTest(test, config));
-  const afterHooks = _.map([].concat(suite._afterAll, suite._afterEach), test => cleanTest(test, config));
-  const cleanTests = _.map(suite.tests, test => cleanTest(test, config));
-  const passingTests = _.filter(cleanTests, { state: 'passed' });
-  const failingTests = _.filter(cleanTests, { state: 'failed' });
-  const pendingTests = _.filter(cleanTests, { pending: true });
-  const skippedTests = _.filter(cleanTests, { skipped: true });
-  let duration = 0;
+  var beforeHooks = _.map([].concat(suite._beforeAll, suite._beforeEach), function (test) {
+    return cleanTest(test, config);
+  });
+  var afterHooks = _.map([].concat(suite._afterAll, suite._afterEach), function (test) {
+    return cleanTest(test, config);
+  });
+  var cleanTests = _.map(suite.tests, function (test) {
+    return cleanTest(test, config);
+  });
+  var passingTests = _.filter(cleanTests, { state: 'passed' });
+  var failingTests = _.filter(cleanTests, { state: 'failed' });
+  var pendingTests = _.filter(cleanTests, { pending: true });
+  var skippedTests = _.filter(cleanTests, { skipped: true });
+  var duration = 0;
 
-  _.each(cleanTests, test => {
+  _.each(cleanTests, function (test) {
     duration += test.duration;
   });
 
@@ -250,37 +270,7 @@ function cleanSuite(suite, totalTestsRegistered, config) {
   suite.duration = duration;
   suite.rootEmpty = suite.root && suite.totalTests === 0;
 
-  removeAllPropsFromObjExcept(suite, [
-    'title',
-    'fullFile',
-    'file',
-    'beforeHooks',
-    'afterHooks',
-    'tests',
-    'suites',
-    'passes',
-    'failures',
-    'pending',
-    'skipped',
-    'hasBeforeHooks',
-    'hasAfterHooks',
-    'hasTests',
-    'hasSuites',
-    'totalTests',
-    'totalPasses',
-    'totalFailures',
-    'totalPending',
-    'totalSkipped',
-    'hasPasses',
-    'hasFailures',
-    'hasPending',
-    'hasSkipped',
-    'root',
-    'uuid',
-    'duration',
-    'rootEmpty',
-    '_timeout'
-  ]);
+  removeAllPropsFromObjExcept(suite, ['title', 'fullFile', 'file', 'beforeHooks', 'afterHooks', 'tests', 'suites', 'passes', 'failures', 'pending', 'skipped', 'hasBeforeHooks', 'hasAfterHooks', 'hasTests', 'hasSuites', 'totalTests', 'totalPasses', 'totalFailures', 'totalPending', 'totalSkipped', 'hasPasses', 'hasFailures', 'hasPending', 'hasSkipped', 'root', 'uuid', 'duration', 'rootEmpty', '_timeout']);
 }
 
 /**
@@ -292,14 +282,14 @@ function cleanSuite(suite, totalTestsRegistered, config) {
  * @param {Integer} totalTestsRegistered.total
  */
 function traverseSuites(suite, totalTestsRegistered, config) {
-  const queue = [];
-  let next = suite;
+  var queue = [];
+  var next = suite;
   while (next) {
     if (next.root) {
       cleanSuite(next, totalTestsRegistered, config);
     }
     if (next.suites.length) {
-      _.each(next.suites, (nextSuite, i) => {
+      _.each(next.suites, function (nextSuite, i) {
         cleanSuite(nextSuite, totalTestsRegistered, config);
         queue.push(nextSuite);
       });
@@ -309,11 +299,11 @@ function traverseSuites(suite, totalTestsRegistered, config) {
 }
 
 module.exports = {
-  log,
-  getPercentClass,
-  removeAllPropsFromObjExcept,
-  cleanCode,
-  cleanTest,
-  cleanSuite,
-  traverseSuites
+  log: log,
+  getPercentClass: getPercentClass,
+  removeAllPropsFromObjExcept: removeAllPropsFromObjExcept,
+  cleanCode: cleanCode,
+  cleanTest: cleanTest,
+  cleanSuite: cleanSuite,
+  traverseSuites: traverseSuites
 };
